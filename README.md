@@ -14,3 +14,11 @@ Components:
 - front module
 
 - google api module
+
+
+## User stories:
+
+
+- Suzi is an EV owner. She wants to charge her car every morning before
+ showing up at work. She wants to use this tool to quickly navigate herself
+ to an available charging station in middle of her commute route. 

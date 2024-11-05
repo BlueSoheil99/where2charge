@@ -44,3 +44,33 @@ The application should assure users that there is no way for use of their accura
  This is necessary to meet the criteria for data ethics.
 
 
+## Components:
+
+1. Control logic
+- It provides the calculation of the input data for the interface.
+- The input is one to multiple origin/destination locations that user specifies, type of plugs and other preferences that user determine.
+- Time, distance, and other trip components for the suggested routes.
+- It uses user interface, navigation system, database, analysis component
+- Side effect: risk of data leakage, crashing risk as it need to handle multiple users, it needs maintenance
+
+2. User interface
+- Gets the input from the user and provide the requested task and visualize them. The main goal is to provide user-friendly 
+environment for EV riders to be able to benefit from the provided analysis.
+- Input: Type of plug, origin/destination locations, and other user preferences for selecting EV charging station
+- Output: Visualization of the suggested route and their differences (e.g., review summary, time, distance, etc.)
+- It should be connected to the control logic and get instructinos, including map, from it.
+- side effects: 
+
+3. navigation system:
+
+
+4. analysis component
+
+
+5. request component:
+-using OOP, it is a clean way to keep track of each request from the user interface. If we keep each request as an object with user inputs as 
+attributes of that object, writing the control logic and handling multiple requests will be simpler.
+
+6. Database
+
+

@@ -4,3 +4,4 @@ uvicorn
 requests
 folium
 streamlit-folium
+pyyaml

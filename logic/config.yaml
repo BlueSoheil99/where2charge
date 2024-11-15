@@ -1,0 +1,7 @@
+# config.yaml
+server:
+  host: "localhost"
+  port: 8000
+
+GOOGLE_API_KEY: ""
+OpenAI_API_KEY: ""

@@ -1,0 +1,6 @@
+streamlit
+fastapi
+uvicorn
+requests
+folium
+streamlit-folium

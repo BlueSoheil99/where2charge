@@ -1,6 +1,7 @@
 # server.py
 from fastapi import FastAPI
 from typing import Dict
+from logic import recommender as logic_handler
 
 app = FastAPI()
 
@@ -14,3 +15,8 @@ async def get_map_data() -> Dict:
         ]
     }
     return data
+
+@app.get("/get_suggestions")
+async def get_suggestions(address) -> Dict:
+    return logic_handler.get_suggestions(address)
+

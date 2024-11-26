@@ -46,14 +46,7 @@ The application should assure users that there is no way for use of their accura
 
 ## Components:
 
-1. Control logic
-- It provides the calculation of the input data for the interface.
-- The input is one to multiple origin/destination locations that user specifies, type of plugs and other preferences that user determine.
-- Time, distance, and other trip components for the suggested routes.
-- It uses user interface, navigation system, database, analysis component
-- Side effect: risk of data leakage, crashing risk as it need to handle multiple users, it needs maintenance
-
-2. User interface
+1. User interface (app.py)
 - Gets the input from the user and provide the requested task and visualize them. The main goal is to provide user-friendly 
 environment for EV riders to be able to benefit from the provided analysis.
 - Input: Type of plug, origin/destination locations, and other user preferences for selecting EV charging station
@@ -61,16 +54,36 @@ environment for EV riders to be able to benefit from the provided analysis.
 - It should be connected to the control logic and get instructinos, including map, from it.
 - side effects: 
 
-3. navigation system:
+2. Server handler (server.py)
+- runs the server and gets connected to the user and establishes a connection between user and the logic. Also, it encapsulates the logic package and makes an API.
+- input comes from the UI and output comes from the recommendation system
+- bridges the gap between the backend and the frontend
+
+3. Control logic (recommender.py)
+- It provides the calculation of the input data for the interface.
+- The input is one to multiple origin/destination locations that user specifies, type of plugs and other preferences that user determine.
+- Time, distance, and other trip components for the suggested routes.
+- It uses user navigation system, database, analysis component
+- Side effect: risk of data leakage, crashing risk as it need to handle multiple users, it needs maintenance
+- it has the following three components:
 
 
-4. analysis component
 
+    - 3.1. geographic information collector (googleAPI_handler.py)
+    - It provides EV charging station locations, their details and reviews, and routes
+    - The input is user address and the output is possible options for EV charging
+    - It is called by the control logic
 
-5. request component:
--using OOP, it is a clean way to keep track of each request from the user interface. If we keep each request as an object with user inputs as 
-attributes of that object, writing the control logic and handling multiple requests will be simpler.
+    - 3.2. Database (database.py)
+    - download the data, clean and merge them to have necessary variables for analysis
+    - This will include getting EV charging station dataset and merging supplementary datasets such as EV registration, socio demographics, etc.
+    - It is called by the control logic
 
-6. Database
+    - 3.3. analysis component (analyzer.py)
+    - Gets the information from database and geographic information collector and analyze them to allocate a score to each charging alternative.
+    - It sorts the scores and mark the one with the most appropriate score.
+    - It is called by the control logic 
 
-
+4. Test (test_recommender.py)
+- It will test the control logic components.
+- These tests include smoke test, one-shot test, edge test, and logic test.

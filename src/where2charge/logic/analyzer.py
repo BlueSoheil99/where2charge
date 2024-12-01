@@ -1,8 +1,30 @@
-__all__=['get_suggestions']
+""" this code will use all the data to suggest the best EV charging stations.
+implemented using OOP
+"""
 
-import text_analyzer
+__all__=[]
 
-def get_suggestions(locations):
-    # use text analyzer to get suggestions
-    ans = []
-    return ans
+from .text_analyzer import TextAnalyzer
+
+
+class Analyzer:
+    """
+    an analyzer object, uses data collected from Google and other data sources
+    to find the best charging station. To do this, it also uses the help of
+    ChatGPT
+    """
+    def __init__(self, openai_key):
+        self.text_analyzer = TextAnalyzer(openai_key)
+        print('analyzer is made and connected to openai')
+
+
+
+    def get_suggestions(self, locations):
+        """
+        The main method. all data must be passed to this method
+        :param locations:
+        :return:
+        """
+        # use text analyzer to get suggestions
+        ans = []
+        return ans

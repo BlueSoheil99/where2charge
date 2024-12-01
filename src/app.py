@@ -1,23 +1,38 @@
-# app.py
-import streamlit as st
+"""
+client side implemented with Streamlit
+"""
+import sys
 import requests
+
 import folium
+import streamlit as st
 from streamlit_folium import st_folium
 
-# Fetch map data from FastAPI server
+
+DEFAULT_TIMEOUT = 5
+
 def fetch_map_data():
+    """
+    test function
+    :return:
+    """
     try:
-        response = requests.get("http://localhost:8000/map_data")
+        response = requests.get(f"http://localhost:{server_port}/map_data", timeout=DEFAULT_TIMEOUT)
         response.raise_for_status()
         return response.json().get("locations", [])
+    except requests.exceptions.Timeout:
+        print("Request timed out")
+        return []
     except requests.exceptions.RequestException as e:
         st.error(f"Error fetching data: {e}")
         return []
 
 # Create Streamlit app layout
-st.title("Interactive Map with Streamlit and FastAPI")
+server_port = sys.argv[1]
+st.title("where2charge")
+st.subheader('An EV charging station recommender')
 
-# Center map on Seattle, for example
+# Center map on Seattle
 map_center = [47.6062, -122.3321]
 map_obj = folium.Map(location=map_center, zoom_start=12)
 

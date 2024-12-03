@@ -1,0 +1,19 @@
+name: where2charge
+channels:
+  - defaults
+dependencies:
+  - fastapi=0.112.2
+  - folium=0.14.0
+  - numpy=1.26.4
+  - openai=1.52.1
+  - pandas=2.2.2
+  - pip=24.2
+  - pylint=3.2.7
+  - python=3.12.7
+  - pyyaml=6.0.2
+  - streamlit=1.38.0
+  - uvicorn=0.30.6
+  - yaml=0.2.5
+  - pip:
+      - streamlit-folium==0.23.2
+

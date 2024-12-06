@@ -40,7 +40,7 @@ class Recommender:
             print('ERRRORRROORORO')
 
 
-    def get_suggestions(self, address: str) -> dict:
+    def get_suggestions(self, address: str, n_recomm) -> dict:
         """
 
         :param address:
@@ -56,4 +56,5 @@ class Recommender:
         # data = data_handler.get_data(locations)
         #todo: merge data with locations
         suggestions = self.analyzer.get_suggestions(locations)
+        #todo: send only first n_recommendations
         return suggestions  ## return JSON object containing suggestions

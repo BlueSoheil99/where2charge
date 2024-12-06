@@ -1,7 +1,6 @@
 """ this code will gather EVCS data from Google API.
 implemented using OOP
 """
-
 __all__=[]
 
 from typing import Dict, List

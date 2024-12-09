@@ -49,7 +49,6 @@ def get_routes():
 
     for leg in data["legs"]:
         for step in leg["steps"]:
-            coordinates.append((step["start_location"]["lat"], step["start_location"]["lng"]))
-            coordinates.append((step["end_location"]["lat"], step["end_location"]["lng"]))
+            coordinates.append([step["start_location"]["lat"], step["start_location"]["lng"]])
+            coordinates.append([step["end_location"]["lat"], step["end_location"]["lng"]])
     return coordinates
-

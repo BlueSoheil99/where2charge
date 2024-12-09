@@ -4,7 +4,6 @@ behind our work. To start working with this code, function 'establish_connection
 should be called after importing the module
 """
 import geopandas as gpd
-from shapely.geometry import Point
 
 from .logic.googleAPI_handler import GoogleAPIHandler
 from .logic.analyzer import Analyzer
@@ -59,7 +58,6 @@ class Recommender:
         data.to_csv('data.csv')
         return data.to_json()  ## return JSON object containing suggestions
 
-    
 
     def _merge_data(self, google_data, evcs_data):
         """

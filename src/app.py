@@ -46,7 +46,6 @@ def fetch_map_data(location, num_recommendations):
             timeout=DEFAULT_TIMEOUT
         )
         response.raise_for_status()
-        print(response.text)
         return response.json().get("locations", [])
     except requests.exceptions.Timeout:
         print("Request timed out")
@@ -67,7 +66,7 @@ def clear_map():
     # print(f'st_folium_map["last_clicked"] after making it none: {st_folium_map["last_clicked"]}')
     st.session_state["markers"] = []
     st.session_state["routes"] = []
-    st.session_state['find_button_label'] = f'select a point on map'
+    st.session_state['find_button_label'] = 'select a point on map'
     st.session_state["find_button_disabled"] = True
     st.session_state["origin_variable"] = True
 
@@ -128,12 +127,12 @@ with col1:
 
     if find_button:
         locations = fetch_map_data(st.session_state["origin"][0].location, num_recoms)
-        print(locations)
+        # print(locations)
         st.session_state["markers"] = []
         st.session_state["origin_variable"] = False
 
         for loc in locations:
-            print(loc)
+            # print(loc)
             marker = folium.Marker(
                 location=[loc["lat"], loc["lon"]],
                 popup=loc["name"],

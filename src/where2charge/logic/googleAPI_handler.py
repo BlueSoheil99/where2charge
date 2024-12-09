@@ -102,7 +102,7 @@ class GoogleAPIHandler:
         return df
 
 
-    def add_popular_times(self, latitude, longitude):
+    def get_all_data_from_google(self, latitude, longitude):
         """This function will add popular times data to the DataFrame. However, the popular times data is only available for a limited number of places. 
         Another issue is that LivePopularTimes is not an official Google API, so it may not be as reliable as the official Google API. It is not also working properly 
         for some of the location and cannot scrape their popular times data while it is available on Google Maps.

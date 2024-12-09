@@ -7,6 +7,7 @@ import requests
 import folium
 import streamlit as st
 from streamlit_folium import st_folium
+from streamlit_image_select import image_select
 
 
 # initiating default and fixed values
@@ -88,7 +89,7 @@ st.subheader('An EV charging station recommender')
 #     )
 #     st.session_state["markers"].append(random_marker)
 
-col1, col2 = st.columns([1,3])
+col1, col2 = st.columns([7, 11])
 with col2:
     m = folium.Map(location=MAP_CENTER, zoom_start=12)
     fg = folium.FeatureGroup(name="Markers")
@@ -109,6 +110,21 @@ with col2:
 with col1:
     find_button = st.button(st.session_state['find_button_label'], disabled=st.session_state["find_button_disabled"])
     num_recoms = st.slider("How many recommendations to provide?", 1, 10, DEFAULT_RECOMS)
+
+
+    connector_types = ["Tesla", "CCS1", "J1772"]
+    connector_idx = image_select(
+        label="Select a connector",
+        images=[
+            "src/images/tesla.png",
+            "src/images/CCS1.png",
+            "src/images/J1772.png"
+        ],
+        captions=connector_types,
+        use_container_width=False,
+        return_value='index'
+    )
+    print(f'selected connector: {connector_types[connector_idx]}')
 
     if st_folium_map["last_clicked"]:
         # print(f'st_folium_map["last_clicked"]: {st_folium_map["last_clicked"]}')
@@ -149,5 +165,7 @@ with col1:
         clear_button = st.button('clear search')
         if clear_button:
             clear_map()
+
+
 
 

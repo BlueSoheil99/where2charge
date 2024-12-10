@@ -28,59 +28,67 @@ def _get_data():
             file.write(response1.content)
         print(f"EV charger data downloaded successfully as '{output_file1}'.")
     else:
-        print(f"EV charger data failed to download file. HTTP Status Code: {response1.statuscode}")
+        raise Exception(f"EV charger data failed to download file. HTTP Status Code: {response1.statuscode}")
     if response2.status_code == 200:
         with open(output_file2, 'wb') as file:
             file.write(response2.content)
         print(f"EV registration data downloaded successfully as '{output_file2}'.")
     else:
-        print(f"EV registration data failed to download file. HTTP Status Code: {response2.statuscode}")
+        raise Exception(f"EV registration data failed to download file. HTTP Status Code: {response2.statuscode}")
     return pd.read_csv(output_file1), pd.read_csv(output_file2)
 
 
 def _get_geo_data(evcs_df):
     # read the data
     # df1 = pd.read_csv('./data/alt_fuel_stations_updated.csv')
-    tracts = gpd.read_file("./data/TRACT_2020_90_20_PL.shp")
+    try: 
+        
+        tracts = gpd.read_file("./data/TRACT_2020_90_20_PL.shp")
 
-    # Create a geometry column from the Latitude and Longitude columns
-    geometry = [Point(xy) for xy in zip(evcs_df['Longitude'], evcs_df['Latitude'])]
-    geo_df = gpd.GeoDataFrame(evcs_df, geometry=geometry)
-    
-    # Select the columns we want to keep
-    tracts = tracts[['GEOID_20','TRACT_20_N','AREA_SQMI','geometry']]
-    # Ensure the coordinate reference systems match
-    geo_df = geo_df.set_crs('EPSG:4326')  # We considered 4326 for both as it is the most common CRS
-    tracts = tracts.to_crs('EPSG:4326')
+        # Create a geometry column from the Latitude and Longitude columns
+        geometry = [Point(xy) for xy in zip(evcs_df['Longitude'], evcs_df['Latitude'])]
 
-    # Perform the spatial join now that we have the same CRS
-    geo_df = gpd.sjoin(geo_df, tracts, how="left", predicate='intersects')
-    geo_df = geo_df.dropna(subset=['GEOID_20'])
-    geo_df.to_csv("./data/geo_df.csv", index=False)
-    return pd.read_csv("./data/geo_df.csv")
+        geo_df = gpd.GeoDataFrame(evcs_df, geometry=geometry)
+        # Select the columns we want to keep
+        tracts = tracts[['GEOID_20','TRACT_20_N','AREA_SQMI','geometry']]
+        # Ensure the coordinate reference systems match
+        geo_df = geo_df.set_crs('EPSG:4326')  # We considered 4326 for both as it is the most common CRS
+        tracts = tracts.to_crs('EPSG:4326')
 
+        # Perform the spatial join now that we have the same CRS
+        geo_df = gpd.sjoin(geo_df, tracts, how="left", predicate='intersects')
+        # test the sjoin and raise exception if it fails
+        
+
+        geo_df = geo_df.dropna(subset=['GEOID_20'])
+        geo_df.to_csv("./data/geo_df.csv", index=False)
+        return pd.read_csv("./data/geo_df.csv")
+    except Exception as e: # any issue with the previous steps will lead to an exception
+        raise Exception(f"Failed to get the geodata. Error: {e}")
 
 def _merge_data(geo_df, df_EV):
     # geo_df = pd.read_csv('./data/geo_df.csv')
     # df_EV = pd.read_csv("./data/EVregistration.csv")
+    try:
+        # count of EVs by 2020 Vensus Tract Column
+        df_EV_count = df_EV.groupby('2020 Census Tract').size().reset_index(name='EVs')
+        # change 2020 Census Tract column name to GEOID_20
+        df_EV_count  = df_EV_count.rename(columns={'2020 Census Tract': 'GEOID_20'})
 
-    # count of EVs by 2020 Vensus Tract Column
-    df_EV_count = df_EV.groupby('2020 Census Tract').size().reset_index(name='EVs')
-    # change 2020 Census Tract column name to GEOID_20
-    df_EV_count  = df_EV_count.rename(columns={'2020 Census Tract': 'GEOID_20'})
+        # change to int to merge
+        df_EV_count ['GEOID_20'] = df_EV_count ['GEOID_20'].astype(int)
+        geo_df['GEOID_20'] = geo_df['GEOID_20'].astype(int)
 
-    # change to int to merge
-    df_EV_count ['GEOID_20'] = df_EV_count ['GEOID_20'].astype(int)
-    geo_df['GEOID_20'] = geo_df['GEOID_20'].astype(int)
-
-    # merge
-    merged_df = geo_df.merge(df_EV_count, on='GEOID_20', how='left')
-    merged_df = merged_df[['Fuel Type Code', 'Station Name', 'Street Address', 'Intersection Directions',
-       'City', 'Station Phone', 'Groups With Access Code', 'Access Days Time', 
-       'EV Level1 EVSE Num', 'EV Level2 EVSE Num', 'EV DC Fast Count', 'EV Other Info',
-       'EV Network', 'Latitude', 'Longitude', 'ID', 'Open Date', 'EV Connector Types', 
-       'Facility Type', 'EV Pricing', 'Restricted Access', 'EV Workplace Charging', 'EVs']]
-    merged_df.to_csv("./data/merged_df.csv", index=False)
+        # merge
+        merged_df = geo_df.merge(df_EV_count, on='GEOID_20', how='left')
+        merged_df = merged_df[['Fuel Type Code', 'Station Name', 'Street Address', 'Intersection Directions',
+        'City', 'Station Phone', 'Groups With Access Code', 'Access Days Time', 
+        'EV Level1 EVSE Num', 'EV Level2 EVSE Num', 'EV DC Fast Count', 'EV Other Info',
+        'EV Network', 'Latitude', 'Longitude', 'ID', 'Open Date', 'EV Connector Types', 
+        'Facility Type', 'EV Pricing', 'Restricted Access', 'EV Workplace Charging', 'EVs']]
+        merged_df.to_csv("./data/merged_df.csv", index=False)
+    except Exception as e:
+        raise Exception(f"Failed to merge the final data. Error: {e}")
 
 
 # push geo_df to github
@@ -95,6 +103,7 @@ def _push_data(self):
 
 def get_supplementary_data(address='src/where2charge/logic/data/merged_df.csv'):
     return pd.read_csv(address)
+   
     # try:
     #     evcs_df, evreg_df = _get_data()
     #     geo_df = _get_geo_data()

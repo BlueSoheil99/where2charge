@@ -28,12 +28,13 @@ class GoogleAPIHandler:
             keyword='EV charging station', 
             rank_by='distance'
         )
-
+        # check if latitude and longitude is in correct format
+        if not isinstance(latitude, (int, float)) or not isinstance(longitude, (int, float)):
+            raise ValueError("Latitude and longitude must be numeric.")
         if results.get('results'):
             for i, result in enumerate(results['results'], start=1):
                 if i > 10:  # Limit to the top 10 results
                     break
-                
                 # Extract Place ID and station location
                 place_id = result['place_id']
                 station_location = f"{result['geometry']['location']['lat']},{result['geometry']['location']['lng']}"
@@ -95,7 +96,7 @@ class GoogleAPIHandler:
                     "Route": route  # Store the route details here
                 })
         else:
-            print("No results found.")
+            raise Exception("No results found.")
 
         # Convert the data to a pandas DataFrame
         df = pd.DataFrame(data)

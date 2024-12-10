@@ -3,7 +3,6 @@ running a server using fastAPI library.
 Make sure you have valid keys for Google Places and OpenAI APIs in the config file.
 """
 
-import random
 import json
 from typing import Dict
 
@@ -20,7 +19,7 @@ logic_handler = Recommender(GOOGLE_API_KEY, GPT_API_KEY)
 
 
 @app.get("/get_suggestions")
-async def get_suggestions(lat, lng, n=5) -> Dict:
+async def get_suggestions(lat, lng, n=5, type=None) -> Dict:
     """
     Main function. Gets suggestions from our package
     :param lat: latitude
@@ -30,17 +29,8 @@ async def get_suggestions(lat, lng, n=5) -> Dict:
     """
     lat, lng = float(lat), float(lng)
     print(f'asked for {n} recommendations')
-    data = logic_handler.get_suggestions(lat, lng, n)
-    # data = {
-    #     "locations": [
-    #         {"name": "Location A", "lat": lat1, "lon": lng1, "route": [(lat, lng),(lat1, lng1)], "duration":5},
-    #         {"name": "Location B", "lat": lat2, "lon": lng2, "route": get_routes(), "duration":3}
-    #     ],
-    #     "query_status": f'successful with {n} recommendations'
-    # }
+    data = logic_handler.get_suggestions(lat, lng, n, type)
     data = json.loads(data)
     return data
-
-
 
 

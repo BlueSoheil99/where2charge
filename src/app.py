@@ -33,7 +33,7 @@ if 'origin_variable' not in st.session_state:
 
 
 @st.cache_data
-def fetch_map_data(location, num_recommendations):
+def fetch_map_data(location, num_recommendations, charger_type):
     """
 
     :param location:
@@ -43,10 +43,10 @@ def fetch_map_data(location, num_recommendations):
     lat, lng = location
     try:
         response = requests.get(
-            f"http://localhost:{server_port}/get_suggestions/?lat={lat}&lng={lng}&n={num_recommendations}",
+            f"http://localhost:{server_port}/get_suggestions/"
+            f"?lat={lat}&lng={lng}&n={num_recommendations}&type={charger_type}",
             timeout=DEFAULT_TIMEOUT
         )
-        # import pdb; pdb.set_trace()
         response.raise_for_status()
         return response.json().get("locations", [])
     except requests.exceptions.Timeout:
@@ -111,22 +111,23 @@ with col2:
     )
 
 with col1:
-    find_button = st.button(st.session_state['find_button_label'], disabled=st.session_state["find_button_disabled"])
-    num_recoms = st.slider("How many recommendations to provide?", 1, 10, DEFAULT_RECOMS)
+    find_button = st.button(
+        st.session_state['find_button_label'], disabled=st.session_state["find_button_disabled"]
+    )
+
+    num_recoms = st.slider(
+        "How many recommendations to provide?", 1, 10, DEFAULT_RECOMS
+    )
 
     connector_types = ["Tesla", "CCS1", "J1772"]
     connector_idx = image_select(
         label="Select a connector",
-        images=[
-            "src/images/tesla.png",
-            "src/images/CCS1.png",
-            "src/images/J1772.png"
-        ],
+        images=["src/images/tesla.png", "src/images/CCS1.png","src/images/J1772.png"],
         captions=connector_types,
         use_container_width=False,
         return_value='index'
     )
-    print(f'selected connector: {connector_types[connector_idx]}')
+    selected_connector = connector_types[connector_idx]
 
     if st_folium_map["last_clicked"]:
         # print(f'st_folium_map["last_clicked"]: {st_folium_map["last_clicked"]}')
@@ -144,7 +145,7 @@ with col1:
 
 
     if find_button:
-        locations = fetch_map_data(st.session_state["origin"][0].location, num_recoms)
+        locations = fetch_map_data(st.session_state["origin"][0].location, num_recoms, selected_connector)
         st.session_state["markers"] = []
         st.session_state["origin_variable"] = False
 

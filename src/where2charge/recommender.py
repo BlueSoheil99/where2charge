@@ -1,8 +1,11 @@
 """
 This file get connected to the server and handles the logic
-behind our work. To start working with this code, function 'establish_connection'
-should be called after importing the module
+behind our work. To start working with this code, first a
+Recommender object must be successfully instantiated.
 """
+
+__all__=['Recommender']
+
 import json
 import geopandas as gpd
 
@@ -12,10 +15,13 @@ from .logic.data_handler import get_supplementary_data
 
 
 
-
 def _merge_data(google_data, evcs_data):
     """
-    merge the data from google and evcs"""
+    merge the data from Google Places API and census tract data, EVCS data
+    :param google_data:
+    :param evcs_data:
+    :return:
+    """
     # Convert to GeoDataFrame
     gdf10 = gpd.GeoDataFrame(google_data,
                              geometry=gpd.points_from_xy(google_data['Longitude'], google_data['Latitude']))
@@ -37,12 +43,11 @@ def _merge_data(google_data, evcs_data):
 
 def _clean_routes(data):
     """
-    Updates the 'Route' entries in the data to contain only latitude and longitude coordinates.
-
-    :param parsed_data: List of dictionaries, where each dictionary represents a record containing route data.
+    Simplifies 'Route' entries in the data from Google queries to only latitude and longitude coordinates.
+    These points can be shown on a map by drawing a polyline
+    :param data: List of dictionaries, where each dictionary represents a record containing route data.
     :return: Updated dataset with modified 'Route' entries.
     """
-    # updated_data = []
     for entry in data:
         route = entry.get("Route")  # Get the "Route" data for each row
         if route:  # Check if the route data exists
@@ -56,9 +61,25 @@ def _clean_routes(data):
                     coordinates.append(end)
             # Replace the "Route" data with extracted coordinates
             entry["Route"] = coordinates
-        # updated_data.append(entry)
-    # print(data)
-    # return updated_data
+    return data
+
+
+def _to_list(data)->list:
+    """
+    this function transforms the data from a dataframe into a list of objects (json)
+    [{'Name': 'Charger1', 'Location': {'lat': ..., 'lng': ...}, 'Review score': 1.0,
+            'Distance': '0.2 km', 'Travel_Time': '1 min', 'Route': {...}},
+     {'Name':...}]
+
+    :param data: dataframe created in Recommender.get_suggestions() method
+    :return: a dictionary where
+    """
+    # we need to remove geometry (it shouldn't be geo dataframe) to be able to convert to json
+    data = data.drop(columns=['geometry'])
+    # we need to orient on records to all columns infor for each row then move to the next
+    data = data.to_json(orient='records')
+    # converting the json string to a list
+    data = json.loads(data)
     return data
 
 
@@ -84,29 +105,37 @@ class Recommender:
         :return:
         """
         try:
-            self.analyzer = Analyzer(openai_api_key)
             self.google_handler = GoogleAPIHandler(google_api_key)
+            self.analyzer = Analyzer(openai_api_key)
             self.evcs_data = get_supplementary_data()
         except Exception as e: #todo: exact error type and message TBD
-            print(f'Error: {e}')
+            raise e
 
 
-    def get_suggestions(self, lat, lng, n_recomm):
+    def get_suggestions(
+            self, lat, lng, n_recomm=5, charger_type=None
+    ):
         """
-
-        :param address:
-        :return:
+        Main function that is called from outside of this package.
+        :param lat: latitude of user's given address
+        :param lng: longitude of user's given address'
+        :param n_recomm: number of recommendations that the user is asking for
+        :param charger_type: charger type of user's electric vehicle
+        :return: A json string formatted in a way that server and app are implemented based on
         """
+        print(lat, lng, n_recomm, charger_type)  # log
         #todo error handling
-
+        ## find suggestions
         google_data = self.google_handler.get_all_data_from_google(lat, lng)
         data = _merge_data(google_data, self.evcs_data)
+        data = self.analyzer.get_suggestions(data, n_recomm, charger_type)
+        data = self.google_handler.get_routes(data, lat, lng)
 
-        # we need to remove geometry (it shouldn't be geo dataframe) to be able to convert to json
-        data = data.drop(columns=['geometry'])
-        # we need to orient on records to all columns infor for each row then move to the next
-        data = data.to_json(orient='records')
-        # we need to convert the json string to a dictionary (python object)
-        data = json.loads(data)
+        # formatting the data
+        data = _to_list(data)
         data = _clean_routes(data)
-        return json.dumps({'locations': data})
+        # this function is going to be called from server which is located outside of
+        # this package. so we should have a standard output. That's why I feel send out
+        # the output as a json string is a better thing to do.
+        data = json.dumps({'locations': data})
+        return data

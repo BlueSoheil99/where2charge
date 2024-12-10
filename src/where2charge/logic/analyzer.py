@@ -19,12 +19,12 @@ class Analyzer:
 
 
 
-    def get_suggestions(self, locations):
+    def get_suggestions(self, data, n_recomm, charger_type):
         """
         The main method. all data must be passed to this method
-        :param locations:
+        :param data:
         :return:
         """
         # use text analyzer to get suggestions
         ans = []
-        return ans
+        return data

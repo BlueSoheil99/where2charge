@@ -93,9 +93,8 @@ def _push_data(self):
 
 
 
-def get_supplementary_data():
-    return pd.read_csv('src/where2charge/logic/data/merged_df.csv')
-   
+def get_supplementary_data(address='src/where2charge/logic/data/merged_df.csv'):
+    return pd.read_csv(address)
     # try:
     #     evcs_df, evreg_df = _get_data()
     #     geo_df = _get_geo_data()

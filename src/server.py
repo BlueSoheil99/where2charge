@@ -4,6 +4,7 @@ Make sure you have valid keys for Google Places and OpenAI APIs in the config fi
 """
 
 import random
+import json
 from typing import Dict
 
 from fastapi import FastAPI
@@ -28,11 +29,8 @@ async def get_suggestions(lat, lng, n=5) -> Dict:
     :return: data in JSON format
     """
     lat, lng = float(lat), float(lng)
-    # return logic_handler.get_suggestions(lat, lng, n)
-    #lat1, lng1 = lat+random.random()/100, lng+random.random()/100
-    #lat2, lng2 = lat+random.random()/100, lng+random.random()/100
     print(f'asked for {n} recommendations')
-    data = Recommender.get_final_data_and_routes(lat, lng, n)
+    data = logic_handler.get_suggestions(lat, lng, n)
     # data = {
     #     "locations": [
     #         {"name": "Location A", "lat": lat1, "lon": lng1, "route": [(lat, lng),(lat1, lng1)], "duration":5},
@@ -40,7 +38,7 @@ async def get_suggestions(lat, lng, n=5) -> Dict:
     #     ],
     #     "query_status": f'successful with {n} recommendations'
     # }
-
+    data = json.loads(data)
     return data
 
 

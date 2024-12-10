@@ -4,6 +4,7 @@ behind our work. To start working with this code, function 'establish_connection
 should be called after importing the module
 """
 import geopandas as gpd
+import json
 
 from .logic.googleAPI_handler import GoogleAPIHandler
 from .logic.analyzer import Analyzer
@@ -52,11 +53,13 @@ class Recommender:
 
         google_data = self.google_handler.get_all_data_from_google(lat, lng)
         data = self._merge_data(google_data, self.evcs_data)
-        # suggestions = self.analyzer.get_suggestions(data)
-        #todo: send only first n_recommendations
-        # return suggestions.to_json()  ## return JSON object containing suggestions
-        data.to_csv('data.csv')
-        return data.to_json()  ## return JSON object containing suggestions
+
+        data = data.drop(columns=['geometry']) # we need to remove geometry (it shouldn't be geo dataframe) to be able to convert to json
+        data = data.to_json(orient='records') # we need to orient on records to all columns infor for each row then move to the next
+        # we need to convert the json string to a dictionary (python object)
+        data = json.loads(data)
+
+        return data  ## return JSON object containing the whole data
 
 
     def _merge_data(self, google_data, evcs_data):
@@ -80,3 +83,30 @@ class Recommender:
         # Cleanup and finalize
         result = merged.drop(columns=['buffer']).reset_index(drop=True)
         return result
+
+    def get_final_data_and_routes(self, lat, lng, n_recomm):
+        """
+        Updates the 'Route' entries in the data to contain only latitude and longitude coordinates.
+
+        :param parsed_data: List of dictionaries, where each dictionary represents a record containing route data.
+        :return: Updated dataset with modified 'Route' entries.
+        """
+        data = self.get_suggestions(lat, lng, n_recomm)
+        updated_data = []
+
+        for entry in data:
+            route = entry.get("Route")  # Get the "Route" data for each row
+            if route:  # Check if the route data exists
+                coordinates = []
+                for leg in route.get("legs", []):
+                    for step in leg.get("steps", []):
+                        # Extract start and end coordinates
+                        start = (step["start_location"]["lat"], step["start_location"]["lng"])
+                        end = (step["end_location"]["lat"], step["end_location"]["lng"])
+                        coordinates.append(start)
+                        coordinates.append(end)
+                # Replace the "Route" data with extracted coordinates
+                entry["Route"] = coordinates
+            updated_data.append(entry)
+
+        return updated_data

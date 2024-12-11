@@ -7,11 +7,13 @@ Recommender object must be successfully instantiated.
 __all__=['Recommender']
 
 import json
-import geopandas as gpd
 
-from .logic.googleAPI_handler import GoogleAPIHandler
+import geopandas as gpd
+import pandas as pd
+
 from .logic.analyzer import Analyzer
 from .logic.data_handler import get_supplementary_data
+from .logic.googleAPI_handler import GoogleAPIHandler
 
 
 
@@ -75,7 +77,10 @@ def _to_list(data)->list:
     :return: a dictionary where
     """
     # we need to remove geometry (it shouldn't be geo dataframe) to be able to convert to json
-    data = data.drop(columns=['geometry'])
+    if 'geometry' in data.columns:
+        data = data.drop(columns=['geometry'])
+    else:
+        pass
     # we need to orient on records to all columns infor for each row then move to the next
     data = data.to_json(orient='records')
     # converting the json string to a list
@@ -123,15 +128,23 @@ class Recommender:
         :param charger_type: charger type of user's electric vehicle
         :return: A json string formatted in a way that server and app are implemented based on
         """
-        print(lat, lng, n_recomm, charger_type)  # log
+        print('request attributes:', lat, lng, n_recomm, charger_type)  # log
         #todo error handling
-        ## find suggestions
+        ## find suggestions ##
         google_data = self.google_handler.get_all_data_from_google(lat, lng)
         data = _merge_data(google_data, self.evcs_data)
-        data = self.analyzer.get_suggestions(data, n_recomm, charger_type)
-        data = self.google_handler.get_routes(data, lat, lng)
+        # google_data.to_csv('data_google.csv', index=False) # log
+        # data.to_csv('data.csv', index=False) # log
 
-        # formatting the data
+        # data = self.analyzer.get_suggestions(data, n_recomm, charger_type)
+        # todo: there are some limitations in the supplementary data which reduces google results
+        #  from 10 entries to around 3-4 entries. when we fix this, we will use the complete
+        #  dataset and analyze based on all features we have for each EVCS
+        data = self.analyzer.get_suggestions(google_data, n_recomm, None)
+        data = self.google_handler.get_routes(data, lat, lng)
+        data.to_csv('data_sorted.csv', index=False) # log
+
+        ## formatting the data ##
         data = _to_list(data)
         data = _clean_routes(data)
         # this function is going to be called from server which is located outside of

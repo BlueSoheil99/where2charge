@@ -27,7 +27,7 @@ async def get_suggestions(lat, lng, n=5, type=None) -> Dict:
     :param n: number of recommendations
     :return: data in JSON format
     """
-    lat, lng = float(lat), float(lng)
+    lat, lng, n = float(lat), float(lng), int(n)
     print(f'asked for {n} recommendations')
     data = logic_handler.get_suggestions(lat, lng, n, type)
     data = json.loads(data)

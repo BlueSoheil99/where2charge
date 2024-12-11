@@ -8,18 +8,23 @@ from typing import Dict
 
 from fastapi import FastAPI
 
-from .where2charge.recommender import Recommender
+from .where2charge import Recommender
 from . import util
 
 app = FastAPI()
 
 GPT_API_KEY = util.read_config('src/config.yaml')['OpenAI_API_KEY']
 GOOGLE_API_KEY = util.read_config('src/config.yaml')['GOOGLE_API_KEY']
-logic_handler = Recommender(GOOGLE_API_KEY, GPT_API_KEY)
+try:
+    logic_handler = Recommender(GOOGLE_API_KEY, GPT_API_KEY)
+    print('* server ready to work' )
+except Exception as e:
+    print(e)
+    print('* server NOT ready to work. Review Errors.')
 
 
 @app.get("/get_suggestions")
-async def get_suggestions(lat, lng, n=5, type=None) -> Dict:
+async def get_suggestions(lat, lng, n=5, ctype=None) -> Dict:
     """
     Main function. Gets suggestions from our package
     :param lat: latitude
@@ -29,7 +34,7 @@ async def get_suggestions(lat, lng, n=5, type=None) -> Dict:
     """
     lat, lng, n = float(lat), float(lng), int(n)
     print(f'asked for {n} recommendations')
-    data = logic_handler.get_suggestions(lat, lng, n, type)
+    data = logic_handler.get_suggestions(lat, lng, n, ctype)
     data = json.loads(data)
     return data
 

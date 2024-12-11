@@ -112,8 +112,15 @@ class Recommender:
         try:
             self.google_handler = GoogleAPIHandler(google_api_key)
             self.analyzer = Analyzer(openai_api_key)
-            self.evcs_data = get_supplementary_data()
+            try:
+                self.evcs_data = pd.read_csv('src/where2charge/logic/data/merged_df.csv')
+                #todo: Probably won't work when where2charge is installed as a package
+            except FileNotFoundError as e:
+                print(f'---- {e}')
+                self.evcs_data = get_supplementary_data()
+            print('** Recommender successfully initialized')
         except Exception as e: #todo: exact error type and message TBD
+            print('** Recommender failed to initialize')
             raise e
 
 

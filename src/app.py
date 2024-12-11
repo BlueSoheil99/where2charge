@@ -44,7 +44,7 @@ def fetch_map_data(location, num_recommendations, charger_type):
     try:
         response = requests.get(
             f"http://localhost:{server_port}/get_suggestions/"
-            f"?lat={lat}&lng={lng}&n={num_recommendations}&type={charger_type}",
+            f"?lat={lat}&lng={lng}&n={num_recommendations}&ctype={charger_type}",
             timeout=DEFAULT_TIMEOUT
         )
         response.raise_for_status()
@@ -79,18 +79,6 @@ def clear_map():
 st.set_page_config(layout="wide")
 st.title("where2charge")
 st.subheader('An EV charging station recommender')
-
-
-### this button works well if we place it here and not after making the map
-# if st.button("Add random marker"):
-#     import random
-#     random_lat = random.random() * 0.5 + 39.8
-#     random_lon = random.random() * 0.5 - 75.2
-#     random_marker = folium.Marker(
-#         location=[random_lat, random_lon],
-#         popup=f"Random marker at {random_lat:.2f}, {random_lon:.2f}",
-#     )
-#     st.session_state["markers"].append(random_marker)
 
 col1, col2 = st.columns([7, 11])
 with col2:
@@ -162,7 +150,6 @@ with col1:
 
 
     if not st.session_state["origin_variable"]:
-        # clear_button = st.button('clear search', callable(clear_map)) #todo callable not working
         clear_button = st.button('clear search')
         if clear_button:
             clear_map()

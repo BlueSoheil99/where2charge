@@ -41,8 +41,7 @@ def _get_data():
 def _get_geo_data(evcs_df):
     # read the data
     # df1 = pd.read_csv('./data/alt_fuel_stations_updated.csv')
-    try: 
-        
+    try:
         tracts = gpd.read_file("./data/TRACT_2020_90_20_PL.shp")
 
         # Create a geometry column from the Latitude and Longitude columns
@@ -66,9 +65,8 @@ def _get_geo_data(evcs_df):
     except Exception as e: # any issue with the previous steps will lead to an exception
         raise Exception(f"Failed to get the geodata. Error: {e}")
 
+
 def _merge_data(geo_df, df_EV):
-    # geo_df = pd.read_csv('./data/geo_df.csv')
-    # df_EV = pd.read_csv("./data/EVregistration.csv")
     try:
         # count of EVs by 2020 Vensus Tract Column
         df_EV_count = df_EV.groupby('2020 Census Tract').size().reset_index(name='EVs')
@@ -100,18 +98,14 @@ def _push_data(self):
     os.system("git push origin main")
 
 
-
 def get_supplementary_data(address='src/where2charge/logic/data/merged_df.csv'):
-    return pd.read_csv(address)
-   
-    # try:
-    #     evcs_df, evreg_df = _get_data()
-    #     geo_df = _get_geo_data()
-    #     data = _merge_data(geo_df, evreg_df)
-    #     # push_data()
-    #     return data
-    # except Exception as e:
-    #     return pd.read_csv('./data/merged_df.csv')
+    # return pd.read_csv(address)
+    evcs_df, evreg_df = _get_data()
+    geo_df = _get_geo_data()
+    data = _merge_data(geo_df, evreg_df)
+    # push_data()
+    return data
+
    
 
 

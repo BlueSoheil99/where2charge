@@ -5,11 +5,9 @@ The component that uses LLM to analyze the data
 __all__=['TextAnalyzer']
 
 import ast
-import json
 
 from openai import OpenAI
 import pandas as pd
-
 
 
 class TextAnalyzer:
@@ -22,6 +20,8 @@ class TextAnalyzer:
         """
         self.client = OpenAI(api_key=api_key)
         print('**** Textanalyzer is connected to openai')
+        #todo: add location in the input command.
+        # In notes, add that two chargers with close locations can have better ranks.
         self.system_content = ("Act as an electric vehicle owner who wants to charge their EV based"
                                " on data provided for each EV charging station.\n\n# Steps\n\n1. Read "
                                "the input data that is provided for a number of EV charging stations."
@@ -71,6 +71,11 @@ class TextAnalyzer:
                                )
 
     def LLM_analyze(self, data:pd.DataFrame):
+        """
+        Gets recommendations from openAI API.
+        :param data:
+        :return: updated data with a new column 'LLM rank'. Best suggestion has a value of one under this column
+        """
         cols = ['Location', 'Review score', 'Rating count', 'Reviews', 'Travel_Time']
         data_sliced = data[cols]
         json_data = data_sliced.to_json(orient='index')
@@ -87,12 +92,10 @@ class TextAnalyzer:
             frequency_penalty=0,
             presence_penalty=0
         )
-
         # Parse response into a dictionary
         response = response.choices[0].message.content.strip()
         response = ast.literal_eval(response)
         data['LLM rank'] = data.index.map(response)
-
         return data
 
 

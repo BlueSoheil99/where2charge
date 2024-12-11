@@ -1,89 +1,67 @@
 # where2charge
-Course project for CSE583 Software Development for Data Scientists 
+_Course project for 'CSE583 Software Development for Data Scientists' during the autumn 2024 quarter at the University of Washington._
 
-Team members: Arsalan Esmaili, Soheil Keshavarz
+_Team members: Arsalan Esmaili, Soheil Keshavarz_
 
-Goal: Suggesting reliable charging for EV owners
+## Description: 
 
-Components: 
+`where2charge` is a platform that is aimed to suggest reliable charging station options to EV owners.
 
-- manager 
+This repository contains four main components as below:
+- User interface (app.py) 
 
-- analysis module
+- Server handler (server.py)
 
-- front module
+- Control logic (recommender.py)
 
-- google api module
+- Unit tests 
 
-
-## User stories:
-
-
-- Suzi is an EV owner. She wants to charge her car every morning before
- showing up at work. She wants to use this tool to quickly navigate herself
- to an available charging station in middle of her commute route. 
-
-- Brandon: Brandon is an EV owner who wants to look at different charging stations on the map and review their main attributes of reliability. Specifically, he wants to understand their reviews in just few words.
-
-- Susan: Susan is an EV owner who wants to drive to a shopping mall with a EV charger close to her. She wants to get the best suggestion based on the location she wants to go. 
-
-- Leo: Leo is a researcher who wants to analyse trip information of the users (anonymous), and check differences between travel time and see how travel time would be different based on different attributes and investigate equity.
-
-- Joe is an employee in SDOT. He want to see number of EV trips from each traffic analysis zone (TAZ) to better understand the generated demand. He wants to see a summary and a csv file for trips generated. 
-
-- Dave is the system admin. He wants to communicate with app users. He needs a specific interface where he
-can see each user usage, subscription, feedbacks, etc., and send notification to all or a group of users.
-
-- Rob is a hacker. He wants to access location information of users. 
-He made a bot to decode admin credentials. 
-
-* The user's data in this app should be encrypted and the location information needs to be masked in
- a more aggregated level.
-This will be clearly indicated to users. 
-The application should assure users that there is no way for use of their accurate information and all analysis will be used anonymously.
- This is necessary to meet the criteria for data ethics.
-
-
-## Components:
-
-1. User interface (app.py)
-- Gets the input from the user and provide the requested task and visualize them. The main goal is to provide user-friendly 
-environment for EV riders to be able to benefit from the provided analysis.
-- Input: Type of plug, origin/destination locations, and other user preferences for selecting EV charging station
-- Output: Visualization of the suggested route and their differences (e.g., review summary, time, distance, etc.)
-- It should be connected to the control logic and get instructinos, including map, from it.
-- side effects: 
-
-2. Server handler (server.py)
-- runs the server and gets connected to the user and establishes a connection between user and the logic. Also, it encapsulates the logic package and makes an API.
-- input comes from the UI and output comes from the recommendation system
-- bridges the gap between the backend and the frontend
-
-3. Control logic (recommender.py)
-- It provides the calculation of the input data for the interface.
-- The input is one to multiple origin/destination locations that user specifies, type of plugs and other preferences that user determine.
-- Time, distance, and other trip components for the suggested routes.
-- It uses user navigation system, database, analysis component
-- Side effect: risk of data leakage, crashing risk as it need to handle multiple users, it needs maintenance
-- it has the following three components:
+More information on user requirements, component design, structure of this work, and future work
+can be seen at `doc/README.md` and `doc/CSE583 where2charge presentation.pptx`
 
 
 
-    - 3.1. geographic information collector (googleAPI_handler.py)
-    - It provides EV charging station locations, their details and reviews, and routes
-    - The input is user address and the output is possible options for EV charging
-    - It is called by the control logic
+## How to use
+This project can be used in three ways: as a web application, as an API, and as a python package. 
 
-    - 3.2. Database (database.py)
-    - download the data, clean and merge them to have necessary variables for analysis
-    - This will include getting EV charging station dataset and merging supplementary datasets such as EV registration, socio demographics, etc.
-    - It is called by the control logic
+Before using our codes, you need to have:
 
-    - 3.3. analysis component (analyzer.py)
-    - Gets the information from database and geographic information collector and analyze them to allocate a score to each charging alternative.
-    - It sorts the scores and mark the one with the most appropriate score.
-    - It is called by the control logic 
+1. A valid Google API key (https://developers.google.com/maps) with access to Places, Distance Matrix, 
+and Directions APIs.
+2. A valid OpenAI API key (https://platform.openai.com/api-keys)
+### Streamlit based web app
+1. Update `config.yaml` file with your api keys
+```angular2html
+GOOGLE_API_KEY: "your_google_api_key"
+OpenAI_API_KEY: "your_openai_api_key"
+```
+2. run `src/main.py` from root directory of this repo.
 
-4. Test (test_recommender.py)
-- It will test the control logic components.
-- These tests include smoke test, one-shot test, edge test, and logic test.
+**TODO: screenshot** 
+### API
+in case you want to use this work directly as an api instead of a UI.
+
+```angular2html
+
+```
+**TODO: screenshot** 
+
+### a Python package
+
+```angular2html
+pip install where2charge
+```
+Sample code:
+```angular2html
+import where2charge
+
+google_key = 'your_google_api_key'
+openai_key = 'your_openai_api_key'
+
+lat, lng = selected_latitude, selected_longitude
+connector_type = 'Tesla'
+number_of_suggestions = 3
+
+recommender = where2charge.Recommender(google_key, openai_key)
+suggestions = recommender.get_suggestions(lat, lng, number_of_suggestions, connector_type)
+```

@@ -1,65 +1,99 @@
 """
-
+The component that uses LLM to analyze the data
 """
 
-__all__=[]
+__all__=['TextAnalyzer']
+
+import ast
+import json
 
 from openai import OpenAI
 import pandas as pd
 
 
+
 class TextAnalyzer:
     def __init__(self, api_key):
-        print('textanalyzer is connected to openai')
-        # self.client = OpenAI(api_key=api_key)
-#
-#     def s(self):
-#         self.chat_completion = self.chat.completions.create(
-#             model="gpt-4o-mini",
-#             messages=[
-#                 {"role": "system", "content": [{"type": "text", "text": prompt}]},
-#                 {"role": "user", "content": [{"type": "text", "text": sentence}]}
-#             ],
-#             temperature=0.05,
-#             max_tokens=256,
-#             top_p=1,
-#             frequency_penalty=0,
-#             presence_penalty=0
-#         )
-#
-#         # Parse response into a dictionary
-#         lines = response.choices[0].message.content.strip().split('\n')
-#         classification = {category: None for category in classes.keys()}
-#         for line in lines:
-#             for category in classes.keys():
-#                 if line.startswith(category):
-#                     value = line.split(': ')[1]
-#                     classification[category] = value if value != 'None' else None
-#
-#         return classification
-#
-#
-#
-#
-#
-# classes = {
-#     "Other Parties": ["Car", "Truck", "Motorcycle", "Pedestrian", "Cyclist", "Bus", "Scooter", "Other"],
-#     "Injury": ['No Injury', 'Slight', 'Severe', 'Fatality', 'Unknown'],
-#     "Damage": ['No Damage', 'Slight', 'Severe', 'Unknown'],
-#     "Validity": ['Valid', 'Invalid']
-# }
-#
-# prompt = ("There are multiple sentences describing a collision in which one autonomous vehicle was involved."
-#           "Classify the given sentence into the categories below:\n"
-#           "Categories:\n")
-# for category, options in classes.items():
-#     prompt += f"{category}: {','.join(options)}\n"
-# prompt += ("the validity category specifies if such an incident is good data for a crash model.\n"
-#           "by 'Other Parties' we want to know what option hit the autonomous vehicle (AV) or was hit by it.\n"
-#           "Provide the most relevant option for each category. Only use the given options")
-# # If none applies or the text is not explicit enough, use 'None'
-#
-# input_columns = ['Incident description', 'Damage description', 'Injury description', 'Vehicle status']
+        """
+        Instantiates a TextAnalyzer object. Basically, connects to Openai API.
+        Instead of directly using OpenaiAPI, we can use 'aisuite' package
+        and try multiple LLM models.
+        :param api_key: OpenAI API key
+        """
+        self.client = OpenAI(api_key=api_key)
+        print('**** Textanalyzer is connected to openai')
+        self.system_content = ("Act as an electric vehicle owner who wants to charge their EV based"
+                               " on data provided for each EV charging station.\n\n# Steps\n\n1. Read "
+                               "the input data that is provided for a number of EV charging stations."
+                               "\n2. Assess each charging station's available data\n"
+                               "3. Offer the rankings of given charging stations. "
+                               "\n\n\n# Inupt\n\nThe input is formatted as a JSON file with key-value pairs."
+                               " The key for each pair is the index of the entry, and the entry data is "
+                               "the value of the pair."
+                               "\nEach data entry has the following attributes for one EV charging station:"
+                               "\n\"Review score\": "
+                               "Average score of reviewers on Google Maps. If no review is submitted, "
+                               "it is zero."
+                               "\n\"Rating count\": Number of reviews submitted on Google Maps"
+                               "\n\"Reviews\": shows user reviews on Google Maps with their writer Names "
+                               "\n\"Travel_Time\": travel time from our current location to this entry in minutes"
+                               "\n\n# Output Format"
+                               "\n\nProvide a dictionary with same keys as the input and values show their ranking. "
+                               "The value of each key is an integer between 1 and number of input EV charging stations."
+                               " No two values should be identical. The lower the value, the more desirable the "
+                               "corresponding EV charging station is.  "
+                               "\n\n# Example"
+                               "\ninput: "
+                               "\n'{\"0\":{\"Review score\":0.0,\"Rating count\":0,\"Reviews\":\"[\\'No reviews found."
+                               "\\']\",\"Travel_Time\":\"6 mins\"},\"1\":{\"Review score\":1.0,\"Rating count\":1,"
+                               "\"Reviews\":\"[\\'William Gibbs: One star because ALL chargers at this location are out"
+                               " of service (as of mid-May 2023)\\']\",\"Travel_Time\":\"7 mins\"},"
+                               "\"2\":{\"Review score\":3.0,\"Rating count\":4,\"Reviews\":\"[\\'Benjamin Lin: "
+                               "Charging here multiple times, no issue until today found a gas car occupied the spot "
+                               "and there are plenty of open lots. I heard some people doing this on purpose. "
+                               "I don\\\\u2019t know why?\\', \\'Nick Corcimiglia: Finally working! "
+                               "Volta app is showing \\\\u201cunknown\\\\u201d status, station 02 is properly working."
+                               " It\\\\u2019s FREE!!\\', \\'Eric and Laura Sager: One of the chargers at Safeway has "
+                               "been removed, the other is non-functional\\', \\\\\"Mariann K. Smith: Charger at Safeway"
+                               " parking lot doesn\\'t work.\\\\\"]\",\"Travel_Time\":\"4 mins\"}}"
+                               "'\n\noutput:"
+                               "\n'{0:2, 1:3, 2:1}'\nThis output means that the input with the index of 2 is "
+                               "the first EV charging station to go. It makes sense because it has better travel time,"
+                               " reviews, and review scores than other charging stations. On the other hand, index 1 "
+                               "corresponds to the least desirable charging station where the travel time is greater"
+                               " than other stations and it has only one negative review which is worse than having "
+                               "no review at all (the case for the first charger).\n\n# Notes\n\n- The review score "
+                               "for a station with a rating count of zero can be estimated as the average score of"
+                               " all inputs with valid reviews.\n- a station with no review is better than a station"
+                               " with only negative reviews and a very low review score.\n- if a station has many "
+                               "reviews, the review score is more reliable than a station with only a few reviews. \n"
+                               " \n- only output the suggestion dictionary, with no additional explanation.\n"
+                               )
+
+    def LLM_analyze(self, data:pd.DataFrame):
+        cols = ['Location', 'Review score', 'Rating count', 'Reviews', 'Travel_Time']
+        data_sliced = data[cols]
+        json_data = data_sliced.to_json(orient='index')
+
+        response = self.client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": [{"type": "text", "text": self.system_content}]},
+                {"role": "user", "content": [{"type": "text", "text": json_data}]}
+            ],
+            temperature=0.05,
+            max_tokens=256,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0
+        )
+
+        # Parse response into a dictionary
+        response = response.choices[0].message.content.strip()
+        response = ast.literal_eval(response)
+        data['LLM rank'] = data.index.map(response)
+
+        return data
 
 
 

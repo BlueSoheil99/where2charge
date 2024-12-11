@@ -29,13 +29,15 @@ if 'find_button_label' not in st.session_state:
     st.session_state["find_button_label"] = 'select a point on the map'
 if 'origin_variable' not in st.session_state:
     st.session_state["origin_variable"] = True
+if 'selected_point' not in st.session_state:
+    st.session_state["selected_point"] = ''
 
 
 
 @st.cache_data
 def fetch_map_data(location, num_recommendations, charger_type):
     """
-
+    This function sends a HTTP request to the server
     :param location:
     :param num_recommendations:
     :return:
@@ -58,9 +60,9 @@ def fetch_map_data(location, num_recommendations, charger_type):
     # except fastapi.exceptions.ResponseValidationError:
 
 
-
 def clear_map():
     """
+    Called when the user pushes clear button after suggestions are shown.
     we tried to call it with clear_button. NO success
     :return:
     """
@@ -73,12 +75,12 @@ def clear_map():
     st.session_state['find_button_label'] = 'select a point on map'
     st.session_state["find_button_disabled"] = True
     st.session_state["origin_variable"] = True
-
+    st.session_state["selected_point"] = ''
 
 # Create Streamlit app layout
 st.set_page_config(layout="wide")
 st.title("where2charge")
-st.subheader('An EV charging station recommender')
+st.subheader('_An EV charging station recommender_', divider=True)
 
 col1, col2 = st.columns([7, 11])
 with col2:
@@ -100,9 +102,13 @@ with col2:
 
 with col1:
     find_button = st.button(
-        st.session_state['find_button_label'], disabled=st.session_state["find_button_disabled"]
+        st.session_state['find_button_label'],
+        disabled=st.session_state["find_button_disabled"],
+        use_container_width=True
     )
-
+    st.write(
+        st.session_state["selected_point"]
+    )
     num_recoms = st.slider(
         "How many recommendations to provide?", 1, 10, DEFAULT_RECOMS
     )
@@ -128,7 +134,8 @@ with col1:
                 icon=folium.Icon(color="red")
             )
             st.session_state["origin"] = [marker]
-            st.session_state['find_button_label'] = f'find nearest charging stations for {point}'
+            st.session_state['find_button_label'] = 'find nearest charging stations'
+            st.session_state["selected_point"] = f'Selected location: {point['lat'], point['lng']}'
             st.session_state["find_button_disabled"] = False
 
 
@@ -141,16 +148,20 @@ with col1:
             marker = folium.Marker(
                 location=[loc["Location"]['lat'], loc["Location"]['lng']],
                 popup=loc["Name"],
-                tooltip=f'{loc["Name"]} \nscore: {loc["Review score"]} \nTravel time: {loc["Travel_Time"]}',
+                tooltip=f'<b>suggestion rank:{loc["LLM rank"]} </b>'
+                        f'<br>{loc["Name"]} '
+                        f'<br> review score: {loc["Review score"]} '
+                        f'<br>Travel time: {loc["Travel_Time"]}',
             )
             st.session_state["markers"].append(marker)
 
-            r = folium.PolyLine(loc["Route"], color="blue", weight=5, opacity=0.6, tooltip=loc["Travel_Time"])
+            r = folium.PolyLine(loc["Route"], color="blue", weight=5, opacity=0.6,
+                                tooltip=f'Travel time to suggestion {loc["LLM rank"]}:<br> {loc["Travel_Time"]}')
             st.session_state["routes"].append(r)
 
 
     if not st.session_state["origin_variable"]:
-        clear_button = st.button('clear search')
+        clear_button = st.button('clear search', use_container_width=True)
         if clear_button:
             clear_map()
 

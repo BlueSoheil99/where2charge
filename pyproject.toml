@@ -49,6 +49,8 @@ keywords = [
 ]
 
 [tool.setuptools_scm]
+qwrite_to = "where2charge/_version.py"
+local_scheme = "no-local-version"
 
 
 [project.urls]

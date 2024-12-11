@@ -6,7 +6,7 @@ from src import util
 
 
 def test_analyzer_and_LLM_smoke():
-    df = pd.read_csv('test/test_data/data_google.csv')
+    df = pd.read_csv('tests/test_data/data_google.csv')
     GPT_API_KEY = util.read_config('src/config.yaml')['OpenAI_API_KEY']
     connector_type = None
     n_recommendations = 5

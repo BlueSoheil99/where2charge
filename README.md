@@ -40,13 +40,14 @@ OpenAI_API_KEY: "your_openai_api_key"
 ![app screenshot](https://github.com/BlueSoheil99/where2charge/blob/main/doc/recording.gif?raw=true)
 
 Please do not click or drag on the map when you see the message below on the app:
-![app screenshot](https://github.com/BlueSoheil99/where2charge/blob/main/doc/running_screenshot.png?raw=true)
+<img src="https://github.com/BlueSoheil99/where2charge/blob/main/doc/running_screenshot.png?raw=true" width=300>
 ### API
-in case you want to use this work directly as an api instead of a UI.
+in case you want to use this work directly as an api instead of a UI, you can get connected to the server. 
+Since this project is deployed on cloud yet, server address is you localhost. To run the server individually,
+run `uvicorn src.server:app --reload --port {selected-port}` on terminal and on the root directory. Then open a browser and type `http://localhost:{selected-port}/docs
+` in the address bar. `selected-port`, `8000` for example, is determined by the user.
 
-```angular2html
 
-```
 ![api_screenshot](https://github.com/BlueSoheil99/where2charge/blob/main/doc/api_screenshot.png?raw=true)
 ### a Python package
 

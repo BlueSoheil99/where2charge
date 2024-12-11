@@ -1,22 +1,23 @@
 """This module contains the tests for the data_handler module."""
 import pytest
 import pandas as pd
-from where2charge.logic.data_handler import get_supplementary_data
+from src.where2charge.logic.data_handler import get_supplementary_data
 
+adr_pre = 'src/where2charge/logic'
 # Smoke test 1. Check if we get any output
 def test_smoke():
-    output = get_supplementary_data(address='src/where2charge/logic/data/merged_df.csv')
+    output = get_supplementary_data(address_prefix=adr_pre, generate=True)
     assert output is not None
 
 # Smoke Test 2 (or One-shot test). the output type
 def test_output_type():
-    output = get_supplementary_data(address='src/where2charge/logic/data/merged_df.csv')
+    output = get_supplementary_data(address_prefix=adr_pre)
     assert type(output) == pd.DataFrame
 
 # Smoke test 3. Check if we get any error
 def test_smoke_error():
     with pytest.raises(Exception):
-        get_supplementary_data(address='src/where2charge/logic/data/merged_df.csv')
+        get_supplementary_data(address_prefix=adr_pre)
 
 
 # Edge test 1. Check if it works with invalid data

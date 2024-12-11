@@ -37,15 +37,17 @@ OpenAI_API_KEY: "your_openai_api_key"
 ```
 2. run `src/main.py` from root directory of this repo.
 
-**TODO: screenshot** 
+![app screenshot](https://github.com/BlueSoheil99/where2charge/blob/main/doc/recording.gif?raw=true)
+
+Please do not click or drag on the map when you see the message below on the app:
+![app screenshot](https://github.com/BlueSoheil99/where2charge/blob/main/doc/running_screenshot.png?raw=true)
 ### API
 in case you want to use this work directly as an api instead of a UI.
 
 ```angular2html
 
 ```
-**TODO: screenshot** 
-
+![api_screenshot](https://github.com/BlueSoheil99/where2charge/blob/main/doc/api_screenshot.png?raw=true)
 ### a Python package
 
 ```angular2html

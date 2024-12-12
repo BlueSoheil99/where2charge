@@ -7,7 +7,7 @@ name = "where2charge"
 dynamic = ["version"]
 authors = [
     {name="Soheil Keshavarz", email="soheil99@uw.edu"},
-    {name="Arsalan Esmaili", email="arsalan9@uw.edu"},
+    {name="Arsalan Esmaili", email="arsalan@uw.edu"},
 ]
 
 description = "where2charge - an EV charging station recommender system"
@@ -49,8 +49,6 @@ keywords = [
 ]
 
 [tool.setuptools_scm]
-qwrite_to = "where2charge/_version.py"
-local_scheme = "no-local-version"
 
 
 [project.urls]

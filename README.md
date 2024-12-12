@@ -3,6 +3,8 @@ _Course project for 'CSE583 Software Development for Data Scientists' during the
 
 _Team members: Arsalan Esmaili, Soheil Keshavarz_
 
+[**PyPI Link**](https://pypi.org/project/where2charge/1.0.0/)
+
 ## Description: 
 
 `where2charge` is a platform that is aimed to suggest reliable charging station options to EV owners.
@@ -29,8 +31,10 @@ Before using our codes, you need to have:
 1. A valid Google API key (https://developers.google.com/maps) with access to Places, Distance Matrix, 
 and Directions APIs.
 2. A valid OpenAI API key (https://platform.openai.com/api-keys)
+
 ### Streamlit based web app
-1. Update `config.yaml` file with your api keys
+1. Clone the repository
+2. Update `config.yaml` file with your api keys
 ```angular2html
 GOOGLE_API_KEY: "your_google_api_key"
 OpenAI_API_KEY: "your_openai_api_key"
@@ -50,9 +54,9 @@ run `uvicorn src.server:app --reload --port {selected-port}` on terminal and on 
 
 ![api_screenshot](https://github.com/BlueSoheil99/where2charge/blob/main/doc/api_screenshot.png?raw=true)
 ### a Python package
-
+Open a terminal and run:
 ```angular2html
-pip install where2charge
+pip install where2charge==1.0.0
 ```
 Sample code:
 ```angular2html
@@ -68,3 +72,18 @@ number_of_suggestions = 3
 recommender = where2charge.Recommender(google_key, openai_key)
 suggestions = recommender.get_suggestions(lat, lng, number_of_suggestions, connector_type)
 ```
+
+## Issues
+- Current UI does not run smoothly and after selecting a point or finishing the query from 
+backend, we need to drag the curse on the map to refresh it.
+- filtering based on connector type is not done yet due to lack of comprehensiveness of supplementary data
+## Future work
+1. Deployment:
+- Make UI more user friendly and smartphone compatible
+- Implement live location detection
+- Implement feedback and user data collection functions
+- Deploy on cloud (AWS)
+
+2. Data analysis:
+- Use more data for decision making
+- Collect data from actual users and fine tune LLM

@@ -56,7 +56,7 @@ run `uvicorn src.server:app --reload --port {selected-port}` on terminal and on 
 ### a Python package
 Open a terminal and run:
 ```angular2html
-pip install where2charge==1.0.0
+pip install where2charge
 ```
 Sample code:
 ```angular2html

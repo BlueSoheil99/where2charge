@@ -13,8 +13,11 @@ from . import util
 
 app = FastAPI()
 
+
 GPT_API_KEY = util.read_config('src/config.yaml')['OpenAI_API_KEY']
 GOOGLE_API_KEY = util.read_config('src/config.yaml')['GOOGLE_API_KEY']
+if not GPT_API_KEY or not GOOGLE_API_KEY:
+    raise ValueError('API keys are missing in the config file.')
 try:
     logic_handler = Recommender(GOOGLE_API_KEY, GPT_API_KEY)
     print('* server ready to work' )

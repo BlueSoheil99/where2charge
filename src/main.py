@@ -1,7 +1,6 @@
-""" This file runs the server and two app instances. """
+"""This file runs the server and two app instances."""
 import subprocess
-
-import util
+from . import util
 
 
 if __name__ == '__main__':
@@ -15,7 +14,7 @@ if __name__ == '__main__':
     command_0 = ["uvicorn", "src.server:app", "--reload", "--port", server_port]
     process_0 = subprocess.Popen(command_0)
 
-    ## Command to run the two Streamlit instances
+    # Command to run the two Streamlit instances
     print('reaching streamlit')
     command_1 = ["streamlit", "run", "src/app.py", "--server.port", client_port1, server_port]
     command_2 = ["streamlit", "run", "src/app.py", "--server.port", client_port2, server_port]

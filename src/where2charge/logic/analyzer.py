@@ -26,7 +26,9 @@ class Analyzer:
         :param data: pandas DataFrame object
         :return: an ordered pd.Dataframe
         """
-        print(f'Analyzer input: given data, n_recom:{n_recomm}, connector type: {charger_type}')  # log
+        print(
+            f'Analyzer input: given data, n_recom:{n_recomm}, connector type: {charger_type}'
+            )  # log
         if charger_type is not None:
             data = data[data['EV Connector Types'].str.contains(charger_type)]
         else:

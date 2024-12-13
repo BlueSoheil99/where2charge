@@ -1,3 +1,4 @@
+""" Tests for the recommender module. """
 import json
 import os
 
@@ -6,6 +7,7 @@ from src import util
 
 
 def is_json(data):
+    """Check if the data is a JSON."""
     try:
         json.loads(data)
         return True
@@ -14,6 +16,7 @@ def is_json(data):
 
 
 def test_recommendation_json(config_address='src/config.yaml'):
+    """ Test if the output of the get_suggestions method is a JSON. """
     os.system('pwd')
     start_location = {'lat': 47.6072982, 'lng': -122.33711}
     GPT_API_KEY = util.read_config(config_address)['OpenAI_API_KEY']
@@ -21,5 +24,3 @@ def test_recommendation_json(config_address='src/config.yaml'):
     recommender = Recommender(GOOGLE_API_KEY, GPT_API_KEY)
     suggestions = recommender.get_suggestions(start_location['lat'], start_location['lng'], 2)
     assert is_json(suggestions)
-
-

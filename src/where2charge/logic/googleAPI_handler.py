@@ -1,11 +1,11 @@
-""" this code will gather EVCS data from Google API.
+""" this module will gather EVCS data from Google API.
 implemented using OOP
 """
 from datetime import datetime
 
 import pandas as pd
 import googlemaps
-import livepopulartimes   # pip install --upgrade git+https://github.com/GrocerCheck/LivePopularTimes
+import livepopulartimes 
 
 
 __all__=['GoogleAPIHandler']
@@ -14,27 +14,37 @@ MAX_NUM_CHARGERS = 10
 
 
 class GoogleAPIHandler:
+    """ A class to handle Google Maps API requests. """
     def __init__(self, api_key: str):
+        if not isinstance(api_key, str) or not api_key.strip():
+            raise ValueError("Invalid API key provided. API key must be a non-empty string.")
         self.gmaps = googlemaps.Client(key=api_key)
         self.API_KEY = api_key
         self.num_near_chargers = MAX_NUM_CHARGERS
         print('*** Google API handler is made')
         # todo: add a check for the api key
+        # test if the api key is string
 
 
     def get_nearby_chargers_with_reviews_and_traveltimes(
             self, latitude, longitude
     ):
+        """ Get nearby EV charging stations with reviews and travel times. """
         # check if latitude and longitude is in correct format
         if not isinstance(latitude, (int, float)) or not isinstance(longitude, (int, float)):
             raise ValueError("Latitude and longitude must be numeric.")
+        # check if latitude and longitude are in the correct range
+        if latitude < -90 or latitude > 90 or longitude < -180 or longitude > 180:
+            raise ValueError(
+                "Latitude and longitude must be within the range of -90 to 90 and -180 to 180"
+                )
 
         data = []  # List to store data for the DataFrame
 
         # Perform a nearby search
         results = self.gmaps.places_nearby(
-            location=(latitude, longitude), 
-            keyword='EV charging station', 
+            location=(latitude, longitude),
+            keyword='EV charging station',
             rank_by='distance'
         )
         if results.get('results'):
@@ -67,7 +77,7 @@ class GoogleAPIHandler:
                 distance_result = self.gmaps.distance_matrix(
                     origins=(latitude, longitude),
                     destinations=station_location,
-                    mode="driving",  
+                    mode="driving",
                     departure_time="now",  # Real-time traffic
                     traffic_model="best_guess"  # Options: "optimistic", "pessimistic", "best_guess"
                 )
@@ -127,17 +137,19 @@ class GoogleAPIHandler:
     def get_all_data_from_google(self, latitude, longitude):
         """
         This function will add popular times data to the DataFrame.
-        However, the popular times data is only available for a limited number of places.
-        Another issue is that LivePopularTimes is not an official Google API, so it may not be as reliable as
-        the official Google API. It is not also working properly for some of the location and cannot scrape
-        their popular times data while it is available on Google Maps.
+        However, the popular times data is only available for a limited 
+        number of places. Another issue is that LivePopularTimes is not 
+        an official Google API, so it may not be as reliable as the 
+        official Google API. It is not also working properly for some
+        of the location and cannot scrape their popular times data 
+        while it is available on Google Maps.
         """
         # Initialize the Google Maps client
         df = self.get_nearby_chargers_with_reviews_and_traveltimes(latitude, longitude)
         df['Popular_times'] = None
         df['Popular_moment'] = None
         for i in range(len(df)): # we might have less than 10 in the previous function
-            place_id = df.loc[i, 'Place_ID'] 
+            place_id = df.loc[i, 'Place_ID']
             #Get the popular times data
             popular_times = livepopulartimes.get_populartimes_by_PlaceID(self.API_KEY, place_id)
             if popular_times['popular_times'] is None:
@@ -150,6 +162,7 @@ class GoogleAPIHandler:
 
 
     def get_routes(self, data: pd.DataFrame, lat, lng):
+        """ Get routes from our current location to each EV charging station. """
         routes = []
         for i, row in data.iterrows():
             dest_lat, dest_lng = row['Location']['lat'], row['Location']['lng']
